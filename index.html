@@ -4,14 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chrysos Heirs — Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="styles/style.css" />
 </head>
-<body>
+<body class="is-loading">
+  <div id="loading-screen" class="loading-screen">
+    <video
+      class="loading-video"
+      src="media/amphoreus_pantalla_de_carga.mp4"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+  </div>
+
   <header class="page-header">
     <h1>Chrysos Heirs</h1>
    </header>
 
-  <main id="cards-container"></main>
+<section id="cards-container"></section>
 
   <script src="scripts/script.js"></script>
 </body>
