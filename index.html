@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi colección</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Encabezado simple de la página. No tiene lógica, solo texto de presentación. -->
+  <header class="page-header">
+    <h1>Mi colección</h1>
+    <p>Renderizada desde JavaScript, no escrita a mano.</p>
+  </header>
+
+  <!--
+    Este <main> está vacío a propósito.
+    El requisito del ejercicio es que las tarjetas NO se escriban a mano en el HTML,
+    sino que script.js las genere y las inserte aquí en tiempo de ejecución.
+    Por eso solo existe el contenedor con un id: JS lo busca con getElementById
+    y le va metiendo las tarjetas dentro.
+  -->
+  <main id="contenedor-tarjetas"></main>
+
+  <!-- El script va al final del body para que el HTML ya esté cargado antes de que JS intente tocarlo. -->
+  <script src="script.js"></script>
+</body>
+</html>
