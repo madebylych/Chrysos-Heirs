@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">
-  <rect width="320" height="180" fill="#3D2C5C">
-    <animate attributeName="fill" values="#3D2C5C;#ffffff;#3D2C5C" dur="1.6s" repeatCount="indefinite" />
-  </rect>
-  <text x="50%" y="50%" fill="#1a1228" font-family="sans-serif" font-size="16"
-        text-anchor="middle" dominant-baseline="middle">GIF 4</text>
-</svg>
