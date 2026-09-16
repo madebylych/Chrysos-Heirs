@@ -1,0 +1,1 @@
+This is an unofficial, non-commercial fan project made for practice. Honkai: Star Rail, Chrysos Heirs, and all related characters, names, artwork, video clips and other media shown here are the property of HoYoverse (COGNOSPHERE PTE. LTD.). No copyright infringement intended.
