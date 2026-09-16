@@ -1,0 +1,64 @@
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+<!-- Pantalla de carga: un video de Amphoreus que se reproduce una
+       sola vez al entrar al sitio. Cuando termina, script.js la
+       desvanece y la borra del HTML. -->
+  <div id="loading-screen" class="loading-screen">
+    <video
+      class="loading-video"
+      src="https://cdn.jsdelivr.net/gh/madebylych/Chrysos-Heirs@master/media/amphoreus_pantalla_de_carga.mp4"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+  </div>
+
+  <!-- Botón fijo (siempre visible, sin importar el scroll) para
+       cambiar entre modo claro y modo oscuro. El texto y el estado
+       aria-pressed los actualiza script.js según el tema activo. -->
+  <button
+    id="theme-toggle"
+    class="theme-toggle"
+    type="button"
+    aria-pressed="false"
+  >
+    Modo oscuro
+  </button>
+
+  <!-- Encabezado: título + subtítulo. Fijo en el HTML porque no
+       depende de ningún dato de la colección. -->
+  <header class="page-header">
+    <h1>Chrysos Heirs</h1>
+    <p class="page-subtitle">The Demigods of Amphoreus</p>
+   </header>
+
+<!-- Contenedor vacío a propósito: script.js lo llena con una
+     <article class="card"> por cada Chrysos Heir del array
+     chrysosHeirs (ver DATOS en script.js). Ninguna tarjeta está
+     escrita a mano acá. -->
+<section id="cards-container"></section>
+
+  <!-- Pie de página: aclaración de que esto es un proyecto de fan,
+       sin fines comerciales, y que todo el material de Honkai: Star
+       Rail / Chrysos Heirs es propiedad de HoYoverse. -->
+  <footer class="site-footer">
+    <p>
+      This is an unofficial, non-commercial fan project made for
+      practice. Honkai: Star Rail, Chrysos Heirs, and all related
+      characters, names, artwork, video clips and other media shown
+      here are the property of HoYoverse (COGNOSPHERE PTE. LTD.). No
+      copyright infringement intended.
+    </p>
+  </footer>
+
+  <!-- Todo el comportamiento del sitio (armar las tarjetas, el
+       modal, la pantalla de carga, el modo oscuro) vive acá. -->

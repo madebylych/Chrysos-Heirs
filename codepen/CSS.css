@@ -1,0 +1,1026 @@
+/* ============================================================
+   CHRYSOS HEIRS — estilos
+   ============================================================
+   Mobile-first: las reglas base son para móvil. Las secciones
+   marcadas TABLET (>=600px) y DESKTOP (>=1024px / >=1440px)
+   solo ajustan el grid y algunos tamaños.
+
+   Las imágenes reales todavía no existen para la mayoría de los
+   personajes (media/ está incompleta). Cada tarjeta trae un
+   fallback automático: si la imagen no carga, se muestra un
+   fondo con degradado + la inicial del nombre, en vez de un
+   ícono de imagen rota.
+   ============================================================ */
+
+/* Variables globales de color. Todo lo que puede cambiar (modo
+   oscuro, el color de cada Path/Elemento) se resuelve reasignando
+   estas variables más abajo, en vez de repetir colores sueltos por
+   todo el archivo. */
+:root {
+  --bg: #1c1526;
+  --panel-bg: #ffffff;
+  --text-strong: #23202b;
+  --text-body: #5b5568;
+  --text-muted: #8b8598;
+  --border-soft: #ece7f3;
+  --shadow-card: 0 18px 40px -22px rgba(35, 20, 60, 0.35),
+    0 2px 10px -2px rgba(35, 20, 60, 0.12);
+  --shadow-card-hover: 0 26px 48px -20px rgba(35, 20, 60, 0.4),
+    0 4px 14px -2px rgba(35, 20, 60, 0.16);
+  --gold: #d9a53c;
+
+  /* Acentos por defecto (se sobreescriben por data-path / data-element) */
+  --path-accent: #7c6fe0;
+  --element-accent: #5b8def;
+}
+
+/* Modo oscuro de las tarjetas (y el modal, que reusa las mismas
+   variables). Se activa poniendo data-theme="dark" en <html> desde
+   script.js; el fondo de la página con la ilustración de Amphoreus no
+   cambia, esto solo afecta el panel blanco de cada tarjeta. */
+:root[data-theme="dark"] {
+  --panel-bg: #211a30;
+  --text-strong: #f4f1fa;
+  --text-body: #cac2dc;
+  --text-muted: #948aad;
+  --border-soft: #37304a;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 22px 44px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Acentos por Path ---------- */
+/* Cada [data-path="..."] pisa --path-accent según el Path del
+   personaje (lo pone script.js como atributo data-path en la tarjeta
+   y en el modal). De ahí sale el color de la pill "Path", del
+   degradado de fondo de la imagen, y del anillo de foco. */
+[data-path="Destruction"] {
+  --path-accent: #e0505a;
+}
+[data-path="Remembrance"] {
+  --path-accent: #5b8def;
+}
+[data-path="Harmony"] {
+  --path-accent: #c565d6;
+}
+[data-path="Erudition"] {
+  --path-accent: #7c6fe0;
+}
+[data-path="Nihility"] {
+  --path-accent: #5b4f7a;
+}
+[data-path="Preservation"] {
+  --path-accent: #c9971f;
+}
+
+/* Excepción puntual: Phainon pasa de rojo (el rojo de Destruction que
+   comparte con Mydei) a morado, sin tocar el color del resto de los
+   Destruction. Va después del bloque de Paths a propósito, para que
+   gane por orden ante el mismo nivel de especificidad. */
+[data-nombre="Phainon"] {
+  --path-accent: #9b59d6;
+}
+
+/* ---------- Acentos por Elemento ---------- */
+/* Mismo mecanismo que los Paths, pero para --element-accent (pill
+   "Elemento" y la otra punta del degradado de la imagen). */
+[data-element="Physical"] {
+  --element-accent: #8a8594;
+}
+[data-element="Lightning"] {
+  --element-accent: #9b5de5;
+}
+[data-element="Quantum"] {
+  --element-accent: #5b4fd8;
+}
+[data-element="Imaginary"] {
+  --element-accent: #d4a537;
+}
+[data-element="Wind"] {
+  --element-accent: #35b38a;
+}
+[data-element="Ice"] {
+  --element-accent: #3ea8d8;
+}
+
+/* ---------- Reset básico ---------- */
+/* box-sizing: border-box en todo: así padding y border se descuentan
+   del width/height declarado, en vez de sumarse (mucho más predecible
+   al armar layouts). */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color: var(--text-strong);
+  background: var(--bg);
+  min-height: 100vh;
+  /* position:relative solo para que exista un contexto de posición;
+     no lo necesita ningún hijo directo hoy, pero es una base segura
+     si se agrega algo posicionado más adelante. */
+  position: relative;
+}
+
+/* Fondo de la página: el arte de Amphoreus. Se pinta en un ::before
+   fixed (en vez de directo en "body") para que siempre cubra el
+   viewport sin estirarse ni repetirse en páginas largas, y sin el
+   jank de background-attachment:fixed en mobile Safari.
+   "vertical" es la imagen por defecto (mobile-first); en pantallas
+   más anchas que altas se cambia a "horizontal". */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  /* z-index negativo: queda detrás de absolutamente todo el
+     contenido normal de la página, sin tener que subirle el z-index
+     a cada cosa que va "encima". */
+  z-index: -1;
+  /* Dos capas de background-image: primero un velo oscuro semi-
+     transparente (para que el texto blanco de arriba siempre
+     contraste bien), y debajo la ilustración en sí. */
+  background-image: linear-gradient(rgba(10, 6, 20, 0.55), rgba(10, 6, 20, 0.55)),
+    url("https://cdn.jsdelivr.net/gh/madebylych/Chrysos-Heirs@master/media/chrysos_fondo_vertical.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+/* En pantallas más anchas que altas (landscape: tablet apaisada,
+   desktop) se cambia la imagen de fondo por la versión horizontal. */
+@media (orientation: landscape) {
+  body::before {
+    background-image: linear-gradient(rgba(10, 6, 20, 0.55), rgba(10, 6, 20, 0.55)),
+      url("https://cdn.jsdelivr.net/gh/madebylych/Chrysos-Heirs@master/media/chrysos_fondo_horizontal.jpg");
+  }
+}
+
+/* Quita el margin por defecto de estos elementos: así el espaciado
+   entre título/párrafos lo controla cada componente con su propio
+   padding/margin, no un margin "de fábrica" del navegador. */
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+/* display:block saca el espacio fantasma que dejan las imágenes
+   inline por defecto; max-width evita que una imagen más grande que
+   su contenedor se salga del layout. */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Mientras la pantalla de carga está puesta, no se puede scrollear
+   el resto de la página por detrás. */
+body.is-loading {
+  overflow: hidden;
+}
+
+/* ---------- Pantalla de carga (video) ---------- */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  /* Bien arriba de todo el contenido normal, pero por debajo del
+     modal (z-index 1200): si alguien logra abrir el modal apenas
+     carga la página, el modal debe poder tapar esto. */
+  z-index: 999;
+  background: #0b0812;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+/* Clase que agrega script.js cuando el video termina (o falla): la
+   pantalla se desvanece con la transition de arriba y después se
+   borra del DOM. */
+.loading-screen.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-video {
+  width: 100%;
+  height: 100%;
+  /* "cover" respeta el aspect ratio del video: en mobile recorta los
+     costados y deja ver el centro, en pantallas anchas recorta arriba/
+     abajo. Nunca lo estira. */
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ---------- Botón de modo oscuro/claro ---------- */
+/* position:fixed (no sticky) para que quede siempre visible sin
+   importar cuánto se haya scrolleado la colección. Va arriba (no
+   abajo a la derecha) a propósito: ahí abajo es justo donde cada
+   tarjeta tiene su link "Ver más ↗", y un botón fijo en esa esquina
+   terminaba tapándolo tarjeta tras tarjeta al scrollear. */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  /* Por encima de las tarjetas y del header, pero bien por debajo
+     del modal (1200) y de la pantalla de carga (999). */
+  z-index: 500;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 10px 18px;
+  /* font-family: inherit para que NO herede la Cinzel del h1 (que es
+     un ancestro más lejano en el DOM) sino la Manrope de "body". */
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(20, 14, 30, 0.65);
+  /* Vidrio esmerilado: desenfoca lo que está detrás del botón (parte
+     de la ilustración de fondo) para que el texto blanco siempre se
+     lea, sea cual sea el color de esa zona de la imagen. */
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+/* Un poco más opaco al pasar el mouse, como feedback de que es
+   clickeable. */
+.theme-toggle:hover {
+  background: rgba(20, 14, 30, 0.85);
+}
+
+/* Anillo de foco visible solo al navegar con teclado (Tab), no al
+   hacer click con mouse — eso es justamente lo que hace
+   :focus-visible en vez de :focus. */
+.theme-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Achicado al hacer click, como un botón "de verdad" — pero solo si
+   la persona no pidió menos animaciones en su sistema operativo. */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-toggle:active {
+    transform: scale(0.96);
+  }
+}
+
+/* En pantallas más grandes se lo separa un poco más del borde. */
+@media (min-width: 600px) {
+  .theme-toggle {
+    top: 24px;
+    right: 24px;
+  }
+}
+
+/* ---------- Encabezado de página ---------- */
+.page-header {
+  padding: 2rem 1.25rem 1.5rem;
+  /* margin-top (no padding del botón) para reservarle su propia franja
+     arriba de todo: centrar el título en el viewport y a la vez
+     esquivar un botón que solo está a la derecha no cierra bien con
+     ningún padding horizontal, así que en cambio el título arranca
+     más abajo que el botón y nunca se cruzan verticalmente. */
+  margin-top: 4.5rem;
+  text-align: center;
+}
+
+.page-header h1 {
+  /* Cinzel: una serif de inscripción romana/griega, no la misma
+     Manrope del resto del sitio — "Chrysos" es "oro" en griego, así
+     que el título se apoya en esa referencia clásica en vez de usar
+     la tipografía neutra de las tarjetas. */
+  font-family: "Cinzel", serif;
+  /* clamp(mínimo, preferido, máximo): el tamaño de letra escala solo
+     con el ancho de pantalla (5vw ≈ el título ocupa siempre una
+     porción similar del ancho), sin pasarse ni quedarse corto en los
+     extremos. */
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fdf6e3;
+  /* Sombra oscura para que se lea sobre cualquier parte de la
+     ilustración de fondo, más un brillo dorado encima (mismo dorado
+     que usa el badge de Deliverer) para que se sienta "de oro". */
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55), 0 0 26px rgba(217, 165, 60, 0.55);
+}
+
+/* Subtítulo en mayúsculas espaciadas ("THE DEMIGODS OF AMPHOREUS"),
+   con la tipografía normal (no la Cinzel del título) para que quede
+   claro que es un texto secundario, no otro titular. */
+.page-subtitle {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(253, 246, 227, 0.75);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Contenedor / grid ---------- */
+/* 1 columna por defecto (mobile). Las media queries de más abajo
+   (TABLET / DESKTOP) van agregando columnas a medida que hay más
+   ancho disponible. */
+#cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.25rem 1.5rem;
+  justify-items: center;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+/* ============================================================
+   TARJETA
+   ============================================================ */
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--panel-bg);
+  border-radius: 28px;
+  box-shadow: var(--shadow-card);
+  /* visible (no hidden): a propósito, para que el sticker circular
+     (.avatar-chip) pueda sobresalir del borde inferior de la imagen
+     sin que la propia tarjeta se lo recorte. */
+  overflow: visible;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Anillo de foco accesible: la tarjeta entera es interactiva (se
+   puede "clickear" con Enter/Espacio desde el teclado), así que
+   necesita su propio indicador de foco visible. */
+.card:focus-visible {
+  outline: 3px solid var(--path-accent);
+  outline-offset: 4px;
+}
+
+/* La tarjeta "flota" un poco y agranda su sombra al pasar el mouse,
+   como pista de que es clickeable. Solo si el sistema no pidió menos
+   animaciones. */
+@media (prefers-reduced-motion: no-preference) {
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+/* Solo Phainon tiene esta clase (heir.isDeliverer === true): un
+   contorno dorado que la distingue del resto de las tarjetas. */
+.card.is-deliverer {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---- Bloque de imagen ---- */
+.card-media {
+  position: relative;
+  /* aspect-ratio en vez de una altura fija: la caja de la imagen crece
+     y se achica en proporción al ancho real de la tarjeta en cada
+     breakpoint, en vez de un alto arbitrario que no se adapta. 3/4 es
+     una proporción de retrato (más alta que ancha) para que el arte
+     del personaje no se corte tanto como con una caja bajita. */
+  aspect-ratio: 3 / 4;
+  /* border-radius acá también (no solo en .portrait-wrap): sin esto,
+     el propio fondo degradado de este contenedor —que es rectangular—
+     asoma en las esquinas superiores por detrás del recorte redondeado
+     de la imagen, y se ven "puntiagudas". SIN overflow:hidden, para
+     que el sticker circular (.avatar-chip) pueda sobresalir del borde
+     inferior sin cortarse a la mitad. */
+  border-radius: 28px 28px 0 0;
+  /* Degradado de respaldo: se ve mientras el retrato carga, y de
+     lleno cuando todavía no existe el archivo de imagen (fallback de
+     inicial, ver .portrait-fallback más abajo). */
+  background: linear-gradient(160deg, var(--path-accent), var(--element-accent));
+}
+
+/* Wrapper que sí recorta (overflow:hidden) a las esquinas redondeadas
+   de arriba: acá vive el <img> del retrato y su fallback. */
+.portrait-wrap {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+}
+
+/* Degradado transparente -> blanco pegado al borde inferior de la
+   imagen, para que el panel de texto no arranque con un corte seco
+   sino que se mezcle con la imagen. Va encima del retrato pero debajo
+   del sticker y la insignia de Deliverer. */
+.card-media-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 110px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--panel-bg) 88%);
+  /* pointer-events:none: es puramente decorativo, no debe interceptar
+     clicks que en realidad van dirigidos a la tarjeta. */
+  pointer-events: none;
+}
+
+.portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Inicial gigante que se ve en vez del retrato mientras ese archivo
+   no existe. display:none por defecto; createImageWithFallback()
+   en script.js agrega la clase .img-missing al wrapper cuando el
+   <img> tira error, y ahí es cuando se activa (ver reglas de abajo). */
+.portrait-fallback {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(3.5rem, 22vw, 4.5rem);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Cuando el wrapper tiene .img-missing: se esconde el <img> roto y se
+   muestra el fallback de inicial en su lugar. */
+.portrait-wrap.img-missing .portrait {
+  display: none;
+}
+.portrait-wrap.img-missing .portrait-fallback {
+  display: flex;
+}
+
+/* Insignia dorada del Deliverer, esquina superior derecha de la imagen */
+.deliverer-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.35);
+}
+
+/* Sticker (gif) superpuesto entre la imagen y el panel, tipo pegatina.
+   Ya NO es un círculo recortado: el gif oficial trae su propio fondo
+   transparente y su propia silueta (el chibi + sus efectos), así que
+   se muestra completo, sin fondo ni máscara, solo con una sombra tipo
+   sticker despegado. */
+.avatar-chip {
+  position: absolute;
+  left: 14px;
+  /* bottom negativo: lo hace sobresalir del borde inferior de
+     .card-media, mitad sobre la imagen y mitad sobre el panel blanco
+     de abajo — el efecto "sticker a caballo entre las dos zonas". */
+  bottom: -30px;
+  width: 92px;
+  height: 92px;
+  /* drop-shadow (no box-shadow): sigue el contorno real del gif con
+     fondo transparente, en vez de proyectar la sombra de una caja
+     cuadrada invisible. */
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  /* contain (no cover): que se vea el sticker completo, sin recortar
+     nada de la ilustración ni de sus efectos. */
+  object-fit: contain;
+}
+
+/* El fallback SÍ mantiene una placa redondeada con color, para que se
+   note que es un placeholder y no un sticker real todavía. */
+.avatar-fallback {
+  display: none;
+  position: absolute;
+  inset: 6px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--path-accent), var(--element-accent));
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+  box-shadow: 0 6px 14px -4px rgba(0, 0, 0, 0.35);
+}
+
+/* Mismo patrón de fallback que .portrait-wrap.img-missing, pero para
+   el sticker. */
+.avatar-chip.img-missing .avatar-img {
+  display: none;
+}
+.avatar-chip.img-missing .avatar-fallback {
+  display: flex;
+}
+
+/* ---- Panel de información ---- */
+.card-panel {
+  /* padding-top grande a propósito: deja espacio libre para que el
+     sticker (que sobresale -30px hacia abajo desde la imagen) no se
+     superponga con el primer contenido del panel. */
+  padding: 44px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Fila de arriba del panel: las pills de Path/Elemento a la derecha
+   (el sticker ocupa la izquierda, por eso flex-end). */
+.card-toprow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Estilo compartido de ambas pills; el color de cada una lo pone la
+   regla específica de abajo (.path-tag / .element-tag). */
+.path-tag,
+.element-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.path-tag {
+  /* Mezclado contra --panel-bg (no un color fijo) para que se adapte
+     solo al modo oscuro sin necesitar una variante "soft" por Path. */
+  background: color-mix(in srgb, var(--path-accent) 20%, var(--panel-bg));
+  color: var(--path-accent);
+}
+
+.element-tag {
+  background: color-mix(in srgb, var(--element-accent) 20%, var(--panel-bg));
+  color: var(--element-accent);
+}
+
+/* Los "···" decorativos (no hacen nada al clickearlos, son parte del
+   diseño de referencia tipo "tarjeta de personaje de juego"). */
+.card-menu {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-weight: 800;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Línea chica debajo del nombre: título/epíteto + versión del juego
+   en la que se volvió jugable. */
+.meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-body);
+  /* Descripción corta: recorta a 3 líneas en la tarjeta. El texto
+     completo (heir.descripcion, sin recortar) se muestra en el modal. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Fila donde caen las pills de "rasgos" (heir.rasgos). flex-wrap para
+   que pasen a la siguiente línea si no entran todas en el ancho de la
+   tarjeta. */
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.trait {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--border-soft);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* Texto "Ver más ↗" pegado abajo a la derecha del panel, como pista
+   visual de que toda la tarjeta es clickeable. */
+.card-hint {
+  align-self: flex-end;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--path-accent);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   MODAL: descripción completa + espacio de video/gif
+   ============================================================ */
+/* Bloquea el scroll del fondo mientras el modal está abierto (misma
+   idea que body.is-loading, pero para el modal). */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Fondo oscuro semi-transparente que cubre toda la pantalla. Centra
+   el .modal adentro con flexbox. Arranca invisible (opacity: 0) y
+   .is-open lo hace aparecer con transición (ver más abajo): así no
+   "spawnea" de golpe. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* Por encima de todo lo demás del sitio, incluida la pantalla de
+     carga (999) y el botón de tema (500). */
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 10, 25, 0.6);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+/* Mientras tiene el atributo HTML "hidden", ni siquiera ocupa layout
+   ni puede recibir clicks — así queda completamente afuera del flujo
+   cuando el modal está cerrado. */
+.modal-overlay[hidden] {
+  display: none;
+}
+
+/* Clase que agrega openHeirModal() un frame después de sacar
+   "hidden": ahí es cuando el navegador anima la opacity de 0 a 1. */
+.modal-overlay.is-open {
+  opacity: 1;
+}
+
+/* La tarjeta blanca del modal en sí. Arranca un poco más abajo y más
+   chica (translateY + scale) y opacity:0; junto con .is-open de abajo
+   arma la animación de "entrada" del modal. */
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  /* Nunca más alto que el 90% del viewport; si el contenido no entra
+     (por ejemplo un video muy alto), aparece scroll interno acá en
+     vez de que el modal se salga de la pantalla. */
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--panel-bg);
+  border-radius: 28px;
+  box-shadow: var(--shadow-card);
+  transform: translateY(16px) scale(0.97);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-overlay.is-open .modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* Si la persona pidió menos animaciones en su sistema, el modal
+   aparece/desaparece directo, sin transición. */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal {
+    transition: none;
+  }
+}
+
+/* Botón "✕" para cerrar, esquina superior derecha del modal. */
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Espacio reservado para el video/gif del personaje (heir.clip).
+   Mientras ese archivo no exista, se ve el placeholder de abajo. */
+.modal-media-slot {
+  position: relative;
+  /* aspect-ratio en vez de una altura fija, así se adapta al ancho
+     real del modal en cada breakpoint. "contain" (abajo) hace que el
+     video entre completo sea cual sea su proporción real. */
+  aspect-ratio: 4 / 3;
+  /* Ojo: nada de max-height acá. Si se le pone un límite de alto, el
+     navegador resuelve el aspect-ratio calculando el ANCHO a partir de
+     ese alto recortado, y la caja termina angosta con un espacio en
+     blanco al costado dentro del modal. Sin límite, ocupa el 100% del
+     ancho del modal y la altura que le toque según 9:16; si eso hace
+     que el modal completo quede más alto que la pantalla, el propio
+     .modal ya tiene su scroll interno (overflow-y: auto). */
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  /* Nada de degradado de Path/Elemento acá: ese color fijo competía
+     con el resplandor real que sale del propio video (.modal-media-
+     backdrop). Un neutro oscuro de respaldo alcanza para el instante
+     antes de que el backdrop cargue, o para el placeholder si no hay
+     clip. */
+  background: #0b0812;
+}
+
+/* El video/gif (o su placeholder) entra con un fundido propio, en vez
+   de aparecer de golpe apenas se inserta en el DOM. Es una @keyframes
+   (no una transition) porque así se dispara sola no bien el elemento
+   existe, sin depender de que el JS cambie de estado en el momento
+   justo. */
+@keyframes modalMediaFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Las tres cosas que pueden aparecer en el espacio de media (el video
+   principal, su fondo desenfocado, o el placeholder) usan la misma
+   animación de entrada. */
+.modal-media-content,
+.modal-media-backdrop,
+.modal-media-placeholder {
+  animation: modalMediaFadeIn 0.5s ease 0.1s both;
+}
+
+/* Copia del mismo video, agrandada y muy desenfocada, que llena TODO
+   el hueco detrás del video real. Como está tan desenfocada no se
+   distingue la imagen: lo que queda es un resplandor de color que sale
+   del propio contenido del video (en vez del degradado fijo del
+   Path/Elemento, que ahora solo se ve un instante mientras esta copia
+   carga). */
+.modal-media-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* cover (no contain): tiene que llenar TODO el hueco sin dejar
+     bordes, no importa que se recorte — total no se distingue con
+     tanto blur. */
+  object-fit: cover;
+  /* scale(1.25): agranda un poco más de lo necesario para tapar
+     cualquier borde/artefacto que deje el blur en el filo de la
+     caja. */
+  transform: scale(1.25);
+  filter: blur(40px) saturate(1.6) brightness(0.85);
+  /* z-index:0, por debajo del video principal (z-index:1): así queda
+     de fondo aunque ambos sean "position" (ver .modal-media-content). */
+  z-index: 0;
+}
+
+.modal-media-content {
+  /* position:relative + z-index:1 (no "static"): necesario para que
+     este elemento pinte POR ENCIMA del backdrop, que es absolute. Sin
+     esto, un elemento posicionado (el backdrop) taparía a uno normal
+     (el video) sin importar el orden en el HTML. */
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  /* "contain" (no "cover"): que entre el video vertical completo, sin
+     recortar arriba/abajo ni a los costados. El sobrante ahora lo
+     llena .modal-media-backdrop (ver arriba), no un color fijo. */
+  object-fit: contain;
+}
+
+/* Mensaje ("Video / GIF próximamente") que se ve cuando heir.clip no
+   existe todavía, o cuando el archivo tira error al cargar. */
+.modal-media-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0 20px;
+}
+
+/* Carrusel manual (solo aparece cuando "clip" trae dos videos, ej.
+   Phainon/Cyrene/Trailblazer): flechas para adelantar/retroceder sin
+   esperar a que termine el que se está viendo. */
+.modal-media-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-media-nav:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.modal-media-nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Las dos flechas comparten .modal-media-nav; estas solo las separan
+   a izquierda y derecha. */
+.modal-media-nav-prev {
+  left: 10px;
+}
+
+.modal-media-nav-next {
+  right: 10px;
+}
+
+.modal-media-dots {
+  /* Arriba, no abajo: la barra de controles nativa del <video> vive
+     abajo y los puntos quedarían tapados o superpuestos con ella. */
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  /* Placa oscura detrás de los puntos: sin esto se pierden contra
+     escenas claras del video. */
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Un punto por clip disponible; script.js le agrega/saca la clase
+   .is-active al que corresponde al video que se está viendo. */
+.modal-media-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.modal-media-dot.is-active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+/* Si la persona pidió menos animaciones, ninguno de los tres
+   elementos de media hace el fundido de entrada. */
+@media (prefers-reduced-motion: reduce) {
+  .modal-media-content,
+  .modal-media-placeholder {
+    animation: none;
+  }
+}
+
+/* El círculo con el ícono "▶" adentro del placeholder de media. */
+.modal-media-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+/* Contenido de texto del modal, debajo del espacio de media: pills,
+   nombre, meta, descripción completa y rasgos. */
+.modal-body {
+  padding: 20px 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Dentro del modal no hay sticker a la izquierda (como sí pasa en la
+   tarjeta), así que las pills van pegadas a la izquierda en vez de a
+   la derecha. */
+.modal-body .card-toprow {
+  justify-content: flex-start;
+}
+
+/* A diferencia de .description (la de la tarjeta), esta NO se recorta
+   con line-clamp: acá se ve el heir.descripcion completo. */
+.modal-description {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+/* ============================================================
+   TABLET (>= 600px)
+   ============================================================ */
+@media (min-width: 600px) {
+  .page-header {
+    padding: 2.5rem 2rem 1.75rem;
+  }
+
+  /* De 1 a 2 columnas, con más espacio entre tarjetas. */
+  #cards-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 2rem;
+    padding: 0 2rem 4.5rem;
+  }
+
+  /* En tablet+ ya no hace falta el max-width de 400px pensado para
+     que la tarjeta no ocupe todo un celular ancho. */
+  .card {
+    max-width: none;
+  }
+
+  .modal {
+    max-width: 560px;
+  }
+}
+
+/* ============================================================
+   DESKTOP (>= 1024px)
+   ============================================================ */
+@media (min-width: 1024px) {
+  /* De 2 a 3 columnas. */
+  #cards-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem 2rem;
+    padding: 0 3rem 5rem;
+  }
+
+  .card-panel {
+    padding: 44px 24px 26px;
+  }
+}
+
+/* Desktop grande: un cuarto por fila cuando hay espacio de sobra */
+@media (min-width: 1440px) {
+  #cards-container {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 1600px;
+  }
+}
+
+/* ---------- Pie de página (crédito / disclaimer de fan project) ---------- */
+.site-footer {
+  padding: 1.5rem 1.25rem 2.5rem;
+  /* Línea divisoria sutil para separarlo visualmente del último
+     renglón de tarjetas de arriba. */
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.site-footer p {
+  /* max-width + margin:0 auto: centra el bloque de texto y evita que
+     las líneas queden demasiado largas en pantallas anchas. */
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  text-align: center;
+  /* Gris claro y discreto a propósito: es información legal, no
+     tiene que competir visualmente con el resto del sitio. */
+  color: rgba(255, 255, 255, 0.55);
+}
