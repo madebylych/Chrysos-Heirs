@@ -195,23 +195,42 @@ async function handleLogin() {
 
 /* ---------- Guardar partidas ---------- */
 
-// id (de users.json) del jugador que entró. null = modo sin servidor:
-// se juega igual pero no hay dónde guardar.
+// id (de users.json) del jugador que entró. null = modo sin servidor
+// (GitHub Pages, file://): la partida se guarda en este navegador.
 let currentUserId = null;
+let currentAlias = "";
+
+// Sin servidor no hay users.json: las partidas quedan en localStorage,
+// solo en este navegador, para que el juego publicado igual tenga historial.
+const LOCAL_ATTEMPTS_KEY = "chrysos-heirs-partidas";
+
+function saveAttemptLocally(result) {
+  try {
+    const all = JSON.parse(localStorage.getItem(LOCAL_ATTEMPTS_KEY)) || [];
+    all.push({ alias: currentAlias, date: new Date().toISOString(), ...result });
+    localStorage.setItem(LOCAL_ATTEMPTS_KEY, JSON.stringify(all));
+    const mine = all.filter((a) => a.alias === currentAlias);
+    const best = Math.min(...mine.map((a) => a.attempts));
+    return `Saved in this browser ✓ (${mine.length} games, best: ${best} attempts)`;
+  } catch (error) {
+    // localStorage bloqueado (modo privado): se juega igual, sin historial.
+    return "Offline: this game was not saved.";
+  }
+}
 
 // memory.js la llama al ganar (ver startMemoryGame). Manda la partida
 // a server.js, que le agrega su propio id y la fecha, y la guarda
 // dentro del usuario en users.json. Devuelve el texto para el modal.
 async function saveAttempt(result) {
-  if (!currentUserId) return "Offline: this game was not saved.";
+  if (!currentUserId) return saveAttemptLocally(result);
   try {
     const saved = await postJson("/api/attempts", { userId: currentUserId, ...result });
     return saved.status === 201
       ? `Saved to your history ✓ (${saved.body.attempt.time})`
       : `Could not save this game (${saved.body.error}).`;
   } catch (error) {
-    // El servidor se apagó en medio de la partida.
-    return "Can't reach the server: this game was not saved.";
+    // El servidor se apagó en medio de la partida: se guarda aquí.
+    return saveAttemptLocally(result);
   }
 }
 
@@ -220,6 +239,7 @@ async function saveAttempt(result) {
 // userId es opcional: sin él (modo sin servidor) no se guarda nada.
 function showWelcome(name, alias, userId = null) {
   currentUserId = userId;
+  currentAlias = alias;
   document.getElementById("welcome-title").textContent = `Welcome, ${alias}`;
   document.getElementById("welcome-text").textContent = `Player: ${name}`;
   loginCard.hidden = true;
@@ -259,7 +279,7 @@ form.addEventListener("submit", async (event) => {
     // se entra igual en "modo sin servidor": el formulario ya pasó la
     // validación, pero no se revisa ni se guarda nada en users.json.
     showWelcome(nameInput.value.trim(), aliasInput.value.trim());
-    document.getElementById("welcome-text").textContent += " · offline (not saved)";
+    document.getElementById("welcome-text").textContent += " · offline (saved in this browser)";
   } finally {
     submitBtn.disabled = false;
   }

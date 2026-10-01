@@ -252,6 +252,11 @@ body.is-loading {
   text-decoration: none;
 }
 
+/* "Jugar" va justo debajo de "Gestionar herederos". */
+.juego-link {
+  top: 64px;
+}
+
 .theme-toggle:hover {
   background: rgba(20, 14, 30, 0.85);
 }
@@ -282,6 +287,10 @@ body.is-loading {
   .gestor-link {
     right: auto;
     left: 24px;
+  }
+
+  .juego-link {
+    top: 76px;
   }
 }
 

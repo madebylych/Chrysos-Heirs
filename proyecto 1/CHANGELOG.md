@@ -12,6 +12,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Dates are `YYYY
 ### Added (site)
 
 - "Gestionar herederos" button on the Chrysos Heirs site that opens `proyecto 1/gestion.html`.
+- "Jugar" button on the Chrysos Heirs site that opens the memory game.
+
+### Added (game)
+
+- The game is reachable: "Play" link in the manager pages, and the game page has the same navigation back.
+- Without a server (GitHub Pages, `file://`) games are saved in this browser (`localStorage`, key `chrysos-heirs-partidas`) with the count and best score per alias.
 
 ### Added
 
