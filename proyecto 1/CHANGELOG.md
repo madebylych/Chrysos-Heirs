@@ -11,8 +11,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Dates are `YYYY
 
 ### Added (site)
 
-- "Gestionar herederos" button on the Chrysos Heirs site that opens `proyecto 1/gestion.html`.
-- "Jugar" button on the Chrysos Heirs site that opens the memory game.
+- "Gestionar herederos" button in the footer of the Chrysos Heirs site that opens `proyecto 1/gestion.html`.
+- "Jugar" button (top left) on the Chrysos Heirs site that opens the memory game.
 
 ### Added (game)
 
