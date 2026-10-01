@@ -244,6 +244,14 @@ body.is-loading {
 
 /* Un poco más opaco al pasar el mouse, como feedback de que es
    clickeable. */
+/* El enlace al gestor usa el mismo estilo de vidrio que el botón de
+   tema, pero va en la esquina izquierda y sin subrayado. */
+.gestor-link {
+  right: auto;
+  left: 16px;
+  text-decoration: none;
+}
+
 .theme-toggle:hover {
   background: rgba(20, 14, 30, 0.85);
 }
@@ -269,6 +277,11 @@ body.is-loading {
   .theme-toggle {
     top: 24px;
     right: 24px;
+  }
+
+  .gestor-link {
+    right: auto;
+    left: 24px;
   }
 }
 

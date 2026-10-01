@@ -1,0 +1,11 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Datos personales de usuarios del juego (correos y hashes de contraseña):
+# viven solo en esta computadora, no se suben al repositorio
+users.json

@@ -337,6 +337,16 @@ function renderTraits(container, rasgos) {
   });
 }
 
+// Arma el texto "epíteto · vX.X". Un personaje creado en el CRUD de
+// "proyecto 1" puede no tener versión (o tenerla en null): en ese caso
+// se muestra solo el epíteto en vez de romper toda la colección con
+// null.toFixed().
+function formatMeta(heir) {
+  const version = Number(heir.version);
+  const hasVersion = heir.version !== null && heir.version !== "" && Number.isFinite(version);
+  return hasVersion ? `${heir.titulo} · v${version.toFixed(1)}` : heir.titulo;
+}
+
 function createCard(heir) {
   const article = document.createElement("article");
   article.className = "card";
@@ -447,7 +457,7 @@ function createCard(heir) {
   // Metadatos: epíteto y versión en la que se volvió jugable.
   const meta = document.createElement("p");
   meta.className = "meta";
-  meta.textContent = `${heir.titulo} · v${heir.version.toFixed(1)}`;
+  meta.textContent = formatMeta(heir);
   panel.appendChild(meta);
 
   // Descripción corta: el texto completo vive en heir.descripcion,
@@ -888,7 +898,7 @@ function openHeirModal(heir, trigger) {
   heirModal.pathTag.textContent = heir.path;
   heirModal.elementTag.textContent = heir.elemento;
   heirModal.name.textContent = heir.nombre;
-  heirModal.meta.textContent = `${heir.titulo} · v${heir.version.toFixed(1)}`;
+  heirModal.meta.textContent = formatMeta(heir);
   heirModal.description.textContent = heir.descripcion;
   renderTraits(heirModal.traits, heir.rasgos);
 
@@ -1053,4 +1063,42 @@ function setupThemeToggle() {
 // vez de "escondidas" en algún lugar del medio.
 setupLoadingScreen();
 setupThemeToggle();
-renderCollection(chrysosHeirs);
+/* ============================================================
+   Conexión con el CRUD de "proyecto 1"
+   ============================================================
+   El panel de gestión (../proyecto 1/gestion.html) guarda la lista
+   completa de herederos en localStorage, bajo la clave
+   "chrysos-heirs-crud". Si esa lista existe y es válida, la página
+   la muestra en lugar del arreglo chrysosHeirs de arriba; así lo que
+   se crea, edita o borra allá aparece aquí al recargar. Si no hay
+   nada guardado (o está dañado), se usa el arreglo de siempre.
+   ============================================================ */
+const CRUD_STORAGE_KEY = "chrysos-heirs-crud";
+
+function getHeirsToRender() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(CRUD_STORAGE_KEY));
+  } catch {
+    // localStorage bloqueado o JSON roto: seguimos con los datos propios
+    return chrysosHeirs;
+  }
+  if (!Array.isArray(saved)) return chrysosHeirs;
+
+  // Solo se aceptan objetos con nombre; además se rellenan los campos
+  // que la tarjeta y el modal dan por hecho (rasgos como lista, etc.).
+  const valid = saved
+    .filter((heir) => heir && typeof heir === "object" && typeof heir.nombre === "string" && heir.nombre.trim())
+    .map((heir) => ({
+      ...heir,
+      titulo: heir.titulo ?? "",
+      path: heir.path ?? "",
+      elemento: heir.elemento ?? "",
+      descripcion: heir.descripcion ?? "",
+      rasgos: Array.isArray(heir.rasgos) ? heir.rasgos : [],
+    }));
+
+  return valid.length ? valid : chrysosHeirs;
+}
+
+renderCollection(getHeirsToRender());

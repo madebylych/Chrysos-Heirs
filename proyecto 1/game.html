@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrysos Heirs — Game</title>
+
+  <!-- Mismas tipografías que el proyecto principal: Cinzel para el
+       título y Manrope para el resto. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <!-- styles.css trae el fondo de Amphoreus, las variables de color y
+       los botones; game.css solo agrega lo propio del login. -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="game.css" />
+</head>
+<body>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+    Dark mode
+  </button>
+
+  <header class="page-header">
+    <h1>Chrysos Heirs</h1>
+    <p class="page-subtitle">The Flame-Chase Game</p>
+  </header>
+
+  <main class="game">
+    <!-- LOGIN. novalidate: apaga los globitos de error del navegador
+         para que la validación (y sus mensajes) la haga game.js. -->
+    <section id="login-card" class="panel login-card">
+      <h2>Enter Amphoreus</h2>
+      <p class="login-hint">Create your player to start.</p>
+
+      <form id="login-form" class="login-form" novalidate>
+        <label class="field">
+          Name
+          <input id="login-name" name="name" type="text" autocomplete="name" maxlength="40"
+                 aria-describedby="name-error" />
+        </label>
+        <p id="name-error" class="form-error"></p>
+
+        <label class="field">
+          Alias
+          <input id="login-alias" name="alias" type="text" autocomplete="nickname" maxlength="20"
+                 aria-describedby="alias-error" />
+        </label>
+        <p id="alias-error" class="form-error"></p>
+
+        <!-- type="email": en el celular abre el teclado con @. La
+             validación de verdad la hace EMAIL_REGEX en game.js
+             (novalidate apaga la del navegador). -->
+        <label class="field">
+          Email
+          <input id="login-email" name="email" type="email" autocomplete="email" maxlength="254"
+                 placeholder="name@example.com" aria-describedby="email-error" />
+        </label>
+        <p id="email-error" class="form-error"></p>
+
+        <label class="field">
+          Password
+          <input id="login-password" name="password" type="password" autocomplete="new-password"
+                 aria-describedby="password-rules password-error" />
+        </label>
+
+        <!-- Lista de requisitos: game.js le pone .is-met a cada <li>
+             mientras se escribe. data-rule es la clave de la regla en
+             PASSWORD_RULES (game.js). -->
+        <ul id="password-rules" class="password-rules">
+          <li data-rule="length">At least 6 characters</li>
+          <li data-rule="upper">One uppercase letter (A–Z)</li>
+          <li data-rule="lower">One lowercase letter (a–z)</li>
+          <li data-rule="number">One number (0–9)</li>
+          <li data-rule="special">One special character (!@#$%…)</li>
+        </ul>
+        <p id="password-error" class="form-error"></p>
+
+        <button id="login-submit" type="submit" class="btn btn-primary login-submit">Enter</button>
+        <!-- Errores que no son de un campo (ej. el servidor apagado). -->
+        <p id="login-status" class="form-error" role="alert"></p>
+      </form>
+
+      <!-- Fuera del <form> a propósito: así no dispara la validación ni
+           el envío. Entra al juego sin usuario (no se guarda nada). -->
+      <button id="guest-btn" type="button" class="btn guest-btn">Play as guest</button>
+    </section>
+
+    <!-- Modal "¿Registrarse?": se abre cuando el email no está en
+         users.json. <dialog> nativo: showModal() bloquea el resto de
+         la página y Escape lo cierra (cuenta como "No"). -->
+    <dialog id="register-dialog" class="dialog register-dialog" aria-labelledby="register-title">
+      <form method="dialog">
+        <h2 id="register-title">New player?</h2>
+        <p id="register-text" class="login-hint"></p>
+        <div class="dialog-actions">
+          <!-- method="dialog" + value: el botón cierra el modal y deja
+               su value en dialog.returnValue ("no" o "yes"). -->
+          <button type="submit" value="no" class="btn">No</button>
+          <button type="submit" value="yes" class="btn btn-primary">Yes, register me</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- JUEGO (Memory). Se muestra recién cuando el login es válido;
+         memory.js arma las cartas dentro de #memory-board. -->
+    <section id="welcome-card" class="panel game-card" hidden>
+      <div class="game-head">
+        <div>
+          <h2 id="welcome-title">Welcome</h2>
+          <p id="welcome-text" class="login-hint"></p>
+        </div>
+        <div class="game-actions">
+          <button id="memory-restart" type="button" class="btn">↺ Restart</button>
+          <button id="logout-btn" type="button" class="btn">Change player</button>
+        </div>
+      </div>
+
+      <!-- HUD: tiempo, intentos y pares. aria-live="off" a propósito:
+           el reloj cambia cada segundo y un lector de pantalla no
+           debería anunciarlo sin parar. -->
+      <div class="memory-hud">
+        <div class="hud-item"><span id="hud-time" class="hud-value">00:00</span><span class="hud-label">Time</span></div>
+        <div class="hud-item"><span id="hud-attempts" class="hud-value">0</span><span class="hud-label">Attempts</span></div>
+        <div class="hud-item"><span id="hud-pairs" class="hud-value">0/0</span><span class="hud-label">Pairs</span></div>
+      </div>
+
+      <p class="login-hint memory-rules">Flip two cards at a time. Find every pair of Chrysos Heirs.</p>
+
+      <div id="memory-board" class="memory-board"></div>
+    </section>
+
+    <!-- Victoria: se abre al encontrar todos los pares. -->
+    <dialog id="victory-dialog" class="dialog register-dialog victory-dialog" aria-labelledby="victory-title">
+      <h2 id="victory-title">You did it!</h2>
+      <p class="victory-label">Your rank</p>
+      <p id="victory-rank" class="victory-rank"></p>
+      <p id="victory-message" class="login-hint"></p>
+      <div class="memory-hud">
+        <div class="hud-item"><span id="victory-time" class="hud-value">--:--</span><span class="hud-label">Time</span></div>
+        <div class="hud-item"><span id="victory-attempts" class="hud-value">0</span><span class="hud-label">Attempts</span></div>
+        <div class="hud-item"><span id="victory-pairs" class="hud-value">0/0</span><span class="hud-label">Pairs</span></div>
+      </div>
+      <!-- memory.js escribe acá si la partida se guardó en users.json. -->
+      <p id="victory-saved" class="victory-saved" role="status" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button id="victory-again" type="button" class="btn btn-primary">Play again</button>
+      </div>
+    </dialog>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      This is an unofficial, non-commercial fan project made for
+      practice. Honkai: Star Rail, Chrysos Heirs, and all related
+      characters, names, artwork, video clips and other media shown
+      here are the property of HoYoverse (COGNOSPHERE PTE. LTD.). No
+      copyright infringement intended.
+    </p>
+  </footer>
+
+  <!-- data.js + store.js: los heirs del juego (loadHeirs, mediaUrl) y
+       setupThemeToggle(). store.js necesita data.js cargado antes, y
+       memory.js tiene que estar antes que game.js, que lo usa. -->
+  <script src="data.js"></script>
+  <script src="store.js"></script>
+  <script src="memory.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrysos Heirs — Manager</title>
+
+  <!-- Mismas tipografías que el proyecto principal: Cinzel para el
+       título y Manrope para el resto. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Botón fijo de modo oscuro/claro; store.js (setupThemeToggle) lo
+       conecta y recuerda la elección en localStorage. -->
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+    Dark mode
+  </button>
+
+  <header class="page-header">
+    <h1>Chrysos Heirs</h1>
+    <p class="page-subtitle">Manager (CRUD)</p>
+    <nav class="page-nav" aria-label="Pages">
+      <a href="index.html" aria-current="page">Quick view</a>
+      <a href="gestion.html">Management panel</a>
+      <a class="nav-main" href="../index.html">View Chrysos Heirs ↗</a>
+    </nav>
+  </header>
+
+  <main class="app">
+    <!-- Barra de herramientas: buscar (Read), crear (Create) y volver
+         a los datos originales de data.js. -->
+    <section class="panel">
+      <div class="toolbar">
+        <label class="search">
+          <span class="visually-hidden">Search</span>
+          <input id="search" type="search" placeholder="Search by name, title or trait…" />
+        </label>
+        <button id="filters-toggle" type="button" class="btn" aria-expanded="false" aria-controls="filters-panel">
+          Filters
+        </button>
+        <button id="new-btn" type="button" class="btn btn-primary">+ New heir</button>
+        <button id="reset-btn" type="button" class="btn">Reset data</button>
+      </div>
+
+      <!-- Panel de filtros por propiedad. Oculto hasta que se abre con
+           el botón "Filters"; app.js llena los <select> con los Path
+           y Element que existan en los datos. -->
+      <div id="filters-panel" class="filters-panel" hidden>
+        <label class="field">
+          <span class="field-caption">Path</span>
+          <select id="filter-path">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-caption">Element</span>
+          <select id="filter-elemento">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="field field-check">
+          <input id="filter-deliverer" type="checkbox" />
+          <span class="field-caption">Only the Deliverer</span>
+        </label>
+        <button id="filters-clear" type="button" class="btn-link">Clear filters</button>
+      </div>
+
+      <!-- aria-live: el lector de pantalla anuncia los mensajes de
+           "guardado", "eliminado", etc. sin mover el foco. -->
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- script rellena esta lista con una fila por cada heredero. -->
+    <ul id="heir-list" class="heir-list"></ul>
+    <p id="empty-state" class="empty-state" hidden>No heirs match your search.</p>
+  </main>
+
+  <!-- Formulario de crear / editar. <dialog> nativo: el navegador ya
+       se encarga de atrapar el foco y de cerrarlo con Escape. -->
+  <dialog id="heir-dialog" class="dialog" aria-labelledby="dialog-title">
+    <form id="heir-form" novalidate>
+      <h2 id="dialog-title">New heir</h2>
+
+      <label>Name *
+        <input name="nombre" type="text" required maxlength="60" />
+      </label>
+      <label>Title
+        <input name="titulo" type="text" maxlength="120" />
+      </label>
+
+      <div class="row">
+        <label>Path
+          <input name="path" type="text" list="path-options" />
+        </label>
+        <label>Element
+          <input name="elemento" type="text" list="element-options" />
+        </label>
+        <label>Version
+          <input name="version" type="number" step="0.1" min="0" />
+        </label>
+      </div>
+      <datalist id="path-options"></datalist>
+      <datalist id="element-options"></datalist>
+
+      <label class="check">
+        <input name="isDeliverer" type="checkbox" />
+        Is the Deliverer
+      </label>
+
+      <label>Description
+        <textarea name="descripcion" rows="4"></textarea>
+      </label>
+      <label>Traits (comma separated)
+        <input name="rasgos" type="text" placeholder="warrior, prophecy" />
+      </label>
+
+      <label>Image path
+        <input name="imagen" type="text" placeholder="media/name.jpg" />
+      </label>
+      <label>Sticker path
+        <input name="sticker" type="text" placeholder="media/name-sticker.gif" />
+      </label>
+      <label>Clip path(s) (comma separated, optional)
+        <input name="clip" type="text" placeholder="media/name.mp4" />
+      </label>
+
+      <p id="form-error" class="form-error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button type="button" id="cancel-btn" class="btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="site-footer">
+    <p>
+      This is an unofficial, non-commercial fan project made for
+      practice. Honkai: Star Rail, Chrysos Heirs, and all related
+      characters, names, artwork, video clips and other media shown
+      here are the property of HoYoverse (COGNOSPHERE PTE. LTD.). No
+      copyright infringement intended.
+    </p>
+  </footer>
+
+  <!-- data.js define el array "chrysosHeirs" (datos iniciales) y tiene
+       que cargarse ANTES que store.js y app.js, que lo usan. -->
+  <script src="data.js"></script>
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

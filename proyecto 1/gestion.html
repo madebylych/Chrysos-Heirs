@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrysos Heirs — Management</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+    Dark mode
+  </button>
+
+  <header class="page-header">
+    <h1>Chrysos Heirs</h1>
+    <p class="page-subtitle">Management panel</p>
+    <nav class="page-nav" aria-label="Pages">
+      <a href="index.html">Quick view</a>
+      <a href="gestion.html" aria-current="page">Management panel</a>
+      <a class="nav-main" href="../index.html">View Chrysos Heirs ↗</a>
+    </nav>
+  </header>
+
+  <main class="admin-shell" id="admin-main" hidden>
+    <!-- SIDEBAR: pestañas. role="tablist"/"tab"/"tabpanel" le dicen al
+         lector de pantalla que son pestañas; gestion.js cambia
+         aria-selected y muestra/esconde cada panel con "hidden". -->
+    <nav class="sidebar" role="tablist" aria-label="Sections" aria-orientation="vertical">
+      <button id="tab-heirs" class="sidebar-tab" type="button" role="tab"
+              aria-selected="true" aria-controls="tabpanel-heirs">Heirs</button>
+      <button id="tab-users" class="sidebar-tab" type="button" role="tab"
+              aria-selected="false" aria-controls="tabpanel-users" tabindex="-1">Users</button>
+    </nav>
+
+    <!-- Pestaña HEIRS: el CRUD de siempre, sin cambios adentro. -->
+    <div id="tabpanel-heirs" class="admin tab-panel" role="tabpanel" aria-labelledby="tab-heirs">
+    <!-- C — CREATE. Los campos NO están escritos acá: gestion.js los
+         genera a partir de HEIR_FIELDS (una entrada por propiedad del
+         objeto heredero), dentro de #create-fields. -->
+    <section class="panel" aria-labelledby="create-title">
+      <h2 id="create-title"><span class="section-letter">C</span> Create</h2>
+      <p class="mode-hint">
+        One field per property of an heir. The small label shows the
+        type of data expected.
+      </p>
+
+      <form id="create-form" class="admin-form" novalidate>
+        <div id="create-fields" class="fields"></div>
+
+        <p id="create-error" class="form-error" role="alert"></p>
+
+        <div class="dialog-actions">
+          <button type="button" id="create-clear" class="btn">Clear</button>
+          <button type="submit" class="btn btn-primary">Accept and add</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- R — READ -->
+    <section class="panel" aria-labelledby="table-title">
+      <div class="panel-head">
+        <h2 id="table-title"><span class="section-letter">R</span> Read <span id="count" class="count"></span></h2>
+        <button id="reset-btn" type="button" class="btn">Reset data</button>
+      </div>
+
+      <label class="search">
+        <span class="visually-hidden">Search</span>
+        <input id="search" type="search" placeholder="Search by name, title or trait…" />
+      </label>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <div class="table-wrap">
+        <table class="heir-table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Path</th>
+              <th scope="col">Element</th>
+              <th scope="col">Ver.</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="heir-body"></tbody>
+        </table>
+      </div>
+      <p id="empty-state" class="empty-state" hidden>No heirs match your search.</p>
+    </section>
+
+    <!-- U — UPDATE. Se elige un heredero y se cargan sus datos en el
+         mismo tipo de campos generados que Create. El botón "Edit" de
+         cada fila de la tabla también elige el heredero acá. -->
+    <section id="update-panel" class="panel" aria-labelledby="update-title">
+      <h2 id="update-title"><span class="section-letter">U</span> Update</h2>
+      <p class="mode-hint">Choose an heir (or press Edit in the table), change what you need and save.</p>
+
+      <form id="update-form" class="admin-form" novalidate>
+        <label class="field">
+          <span class="field-caption">Heir to update</span>
+          <select id="update-select"></select>
+        </label>
+
+        <!-- Deshabilitado mientras no hay heredero elegido: todos los
+             campos de adentro quedan bloqueados. -->
+        <fieldset id="update-fieldset" class="fieldset-reset" disabled>
+          <div id="update-fields" class="fields"></div>
+        </fieldset>
+
+        <p id="update-error" class="form-error" role="alert"></p>
+
+        <div class="dialog-actions">
+          <button type="button" id="update-cancel" class="btn">Cancel</button>
+          <button type="submit" id="update-submit" class="btn btn-primary" disabled>Update heir</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- D — DELETE. Se elige un heredero, se ve un resumen y se borra
+         con el botón. El botón "Delete" de cada fila también lo elige
+         acá. Tras borrar aparece "Undo" unos segundos. -->
+    <section id="delete-panel" class="panel" aria-labelledby="delete-title">
+      <h2 id="delete-title"><span class="section-letter">D</span> Delete</h2>
+      <p class="mode-hint">Choose an heir (or press Delete in the table). You can undo for a few seconds.</p>
+
+      <div class="admin-form">
+        <label class="field">
+          <span class="field-caption">Heir to delete</span>
+          <select id="delete-select"></select>
+        </label>
+
+        <div id="delete-preview" class="delete-preview" aria-live="polite">No heir selected.</div>
+
+        <div class="dialog-actions">
+          <button type="button" id="delete-btn" class="btn btn-danger-solid" disabled>Delete heir</button>
+        </div>
+
+        <p class="status" role="status" aria-live="polite">
+          <span id="delete-message"></span>
+          <button id="undo-btn" type="button" class="btn-link" hidden>Undo</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- S — STORAGE: herramientas de localStorage. -->
+    <section class="panel panel-wide" aria-labelledby="storage-title">
+      <h2 id="storage-title"><span class="section-letter">S</span> Storage</h2>
+      <p class="mode-hint">
+        Your heirs are saved in this browser (localStorage). The
+        Chrysos Heirs site reads them from here, so what you add shows
+        up there too. Export a copy to keep a backup.
+      </p>
+
+      <dl class="storage-list">
+        <div><dt>Status</dt><dd id="storage-status"></dd></div>
+        <div><dt>Key</dt><dd><code id="storage-key"></code></dd></div>
+        <div><dt>Saved heirs</dt><dd id="storage-count"></dd></div>
+        <div><dt>In memory</dt><dd id="storage-memory"></dd></div>
+        <div><dt>Size</dt><dd id="storage-size"></dd></div>
+        <div><dt>Last saved</dt><dd id="storage-time"></dd></div>
+      </dl>
+
+      <div class="storage-actions">
+        <button id="export-btn" type="button" class="btn">Export JSON</button>
+        <button id="import-btn" type="button" class="btn">Import JSON…</button>
+        <button id="clear-storage-btn" type="button" class="btn btn-danger">Clear saved data</button>
+        <!-- El input real de archivo va oculto: el botón de arriba lo
+             abre, para poder darle el mismo estilo que los demás. -->
+        <input id="import-file" type="file" accept="application/json,.json" hidden />
+      </div>
+
+      <p id="storage-message" class="storage-message" role="status" aria-live="polite"></p>
+    </section>
+    </div>
+
+    <!-- Pestaña USERS: jugadores registrados en game.html. Los datos
+         vienen de server.js (GET /api/users), que lee users.json; por
+         eso esta pestaña solo funciona abriendo la página desde
+         http://localhost:3000. -->
+    <div id="tabpanel-users" class="tab-panel" role="tabpanel" aria-labelledby="tab-users" hidden>
+      <section class="panel" aria-labelledby="users-title">
+        <div class="panel-head">
+          <h2 id="users-title">Registered users <span id="users-count" class="count"></span></h2>
+          <button id="users-refresh" type="button" class="btn">Refresh</button>
+        </div>
+        <p class="mode-hint">
+          Players registered in the game (users.json). The password is
+          never saved: only its hash and salt. Click a hash to see it
+          complete, or a game count to see every won game.
+        </p>
+
+        <p id="users-status" class="status" role="status" aria-live="polite"></p>
+
+        <div class="table-wrap">
+          <table class="heir-table users-table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Alias</th>
+                <th scope="col">Email</th>
+                <th scope="col">Password (hash)</th>
+                <th scope="col">Registered</th>
+                <th scope="col">Games</th>
+              </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+        <p id="users-empty" class="empty-state" hidden>No users registered yet.</p>
+      </section>
+    </div>
+  </main>
+
+  <datalist id="path-options"></datalist>
+  <datalist id="element-options"></datalist>
+
+  <!-- Login del panel de administración. No es seguridad real: las
+       credenciales viven en texto plano en credenciales.js, visibles
+       para cualquiera que abra las herramientas de desarrollador. Solo
+       evita que alguien entre al panel CRUD sin querer o sin saber la
+       clave. Mientras no se loguee, #admin-main queda con "hidden". -->
+  <dialog id="login-dialog" class="dialog" aria-labelledby="login-title">
+    <form id="login-form" novalidate>
+      <h2 id="login-title">Admin login</h2>
+
+      <label>Username
+        <input name="usuario" type="text" autocomplete="username" required />
+      </label>
+
+      <label>Password
+        <input name="contrasena" type="password" autocomplete="current-password" required />
+      </label>
+
+      <p id="login-error" class="form-error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button type="submit" class="btn btn-primary">Enter</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="site-footer">
+    <p>
+      This is an unofficial, non-commercial fan project made for
+      practice. Honkai: Star Rail, Chrysos Heirs, and all related
+      characters, names, artwork, video clips and other media shown
+      here are the property of HoYoverse (COGNOSPHERE PTE. LTD.). No
+      copyright infringement intended.
+    </p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="store.js"></script>
+  <script src="credenciales.js"></script>
+  <script src="login.js"></script>
+  <script src="gestion.js"></script>
+</body>
+</html>

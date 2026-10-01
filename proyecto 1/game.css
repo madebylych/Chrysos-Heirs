@@ -1,0 +1,373 @@
+/* ============================================================
+   game.css — login del juego
+   ============================================================
+   Solo lo propio de game.html. El fondo, las variables de color, los
+   inputs y los botones vienen de styles.css.
+   ============================================================ */
+
+.game {
+  display: grid;
+  justify-items: center;
+  padding: 0 1.25rem 4rem;
+}
+
+/* .panel ya le da el fondo blanco/oscuro, el borde redondeado y la
+   sombra; acá solo se limita el ancho. */
+.login-card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card h2 {
+  font-family: "Cinzel", serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.login-hint {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.login-form {
+  display: grid;
+  gap: 6px;
+}
+
+/* Borde rojo solo en los campos que game.js marcó como inválidos. */
+.login-form input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+/* ---------- Lista de requisitos ---------- */
+.password-rules {
+  display: grid;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* El círculo vacío pasa a ✓ dorado cuando se cumple la regla. */
+.password-rules li::before {
+  content: "○";
+  display: inline-block;
+  width: 1.4em;
+}
+
+.password-rules li.is-met {
+  color: var(--text-strong);
+}
+
+.password-rules li.is-met::before {
+  content: "✓";
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.login-submit {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.guest-btn {
+  width: 100%;
+}
+
+/* ---------- Modal "¿Registrarse?" ---------- */
+/* .dialog (styles.css) ya le da el panel redondeado y el fondo
+   oscurecido; acá solo se achica y se le pone el título en Cinzel. */
+.register-dialog {
+  width: min(420px, calc(100% - 2rem));
+}
+
+.register-dialog h2 {
+  margin-bottom: 8px;
+  font-family: "Cinzel", serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.register-dialog .login-hint {
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   JUEGO (Memory) — ver memory.js
+   ============================================================ */
+.game-card {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 860px;
+}
+
+.game-card[hidden] {
+  display: none;
+}
+
+.game-card h2 {
+  font-family: "Cinzel", serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.game-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-head .login-hint {
+  margin: 0;
+  text-align: left;
+}
+
+.game-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.memory-rules {
+  margin: 0;
+}
+
+/* ---------- HUD ---------- */
+.memory-hud {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hud-item {
+  display: grid;
+  justify-items: center;
+  min-width: 84px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+}
+
+.hud-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  /* tabular-nums: todos los números miden lo mismo, así el reloj no
+     "baila" de ancho cuando pasa de 00:11 a 00:12. */
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+.hud-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------- Tablero y cartas ---------- */
+/* max-width: en escritorio, 4 columnas del ancho completo dan cartas
+   enormes y el tablero no entra en la pantalla; 480px deja las 16 a
+   la vista. */
+.memory-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+  justify-self: center;
+}
+
+.memory-card {
+  /* perspective: la "distancia" desde la que se mira el giro 3D. Sin
+     esto el rotateY se vería plano, como si la carta se achicara. */
+  perspective: 1000px;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.memory-card:disabled {
+  cursor: default;
+}
+
+.memory-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+.memory-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* preserve-3d: los hijos (las dos caras) giran en 3D junto con este
+     contenedor en vez de aplanarse. */
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dar vuelta = girar 180° sobre el eje vertical. */
+.memory-card.is-flipped .memory-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  /* backface-visibility: hidden: cada cara se esconde cuando queda de
+     espaldas. Así, al girar, se ve una o la otra, nunca las dos. */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Reverso: el arte de Amphoreus con un velo y una estrella dorada. */
+.memory-face-back {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(217, 165, 60, 0.55);
+  background: linear-gradient(rgba(20, 12, 34, 0.55), rgba(20, 12, 34, 0.75)),
+    url("../media/chrysos_fondo_vertical.jpg") center / cover;
+  color: var(--gold);
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  text-shadow: 0 0 18px rgba(217, 165, 60, 0.7);
+}
+
+/* Frente: arranca ya girado 180°, así queda "de espaldas" hasta que la
+   carta entera gira y lo pone de frente. */
+.memory-face-front {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-soft);
+  transform: rotateY(180deg);
+}
+
+.memory-portrait {
+  position: relative;
+  min-height: 0;
+  background: linear-gradient(135deg, var(--path-accent), #1c1526);
+}
+
+.memory-portrait img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* Inicial de respaldo: queda debajo de la imagen y se ve si no hay. */
+.memory-initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: "Cinzel", serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.memory-info {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 6px 4px 8px;
+}
+
+.memory-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-strong);
+}
+
+.memory-info .path-tag {
+  font-size: 0.62rem;
+}
+
+/* Par encontrado: borde dorado y brillo. */
+.memory-card.is-matched .memory-face-front {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 10px 24px -10px rgba(217, 165, 60, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-inner {
+    transition: none;
+  }
+}
+
+@media (min-width: 600px) {
+  .memory-board {
+    gap: 14px;
+  }
+
+  .memory-name {
+    font-size: 0.85rem;
+  }
+}
+
+/* ---------- Victoria ---------- */
+.victory-dialog {
+  text-align: center;
+}
+
+.victory-dialog .memory-hud {
+  margin: 12px 0 18px;
+}
+
+.victory-dialog .dialog-actions {
+  justify-content: center;
+}
+
+.victory-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.victory-saved {
+  min-height: 1.2rem;
+  margin: -6px 0 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.victory-rank {
+  margin: 4px 0 6px;
+  font-family: "Cinzel", serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+/* .login-card pone display:grid, que le gana al atributo hidden. */
+.login-card[hidden] {
+  display: none;
+}

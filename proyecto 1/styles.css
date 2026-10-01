@@ -1,0 +1,980 @@
+/* ============================================================
+   CHRYSOS HEIRS — Manager (CRUD)
+   ============================================================
+   Mismo sistema visual que ../styles/style.css
+   (variables, fondo, tipografías, píldoras de Path/Elemento, modo
+   oscuro), aplicado a la lista, el panel de gestión y los formularios.
+   Mobile-first.
+   ============================================================ */
+
+/* Variables globales de color. Modo claro por defecto; el oscuro
+   reasigna las mismas variables más abajo. */
+:root {
+  --bg: #1c1526;
+  --panel-bg: #ffffff;
+  --text-strong: #23202b;
+  --text-body: #5b5568;
+  --text-muted: #8b8598;
+  --border-soft: #ece7f3;
+  --shadow-card: 0 18px 40px -22px rgba(35, 20, 60, 0.35),
+    0 2px 10px -2px rgba(35, 20, 60, 0.12);
+  --gold: #d9a53c;
+  --accent: #7c6fe0;
+  --danger: #d23c47;
+
+  /* Acentos por defecto (se sobreescriben por data-path / data-element) */
+  --path-accent: #7c6fe0;
+  --element-accent: #5b8def;
+}
+
+:root[data-theme="dark"] {
+  --panel-bg: #211a30;
+  --text-strong: #f4f1fa;
+  --text-body: #cac2dc;
+  --text-muted: #948aad;
+  --border-soft: #37304a;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+  --danger: #ef6a73;
+}
+
+/* ---------- Acentos por Path ---------- */
+[data-path="Destruction"] {
+  --path-accent: #e0505a;
+}
+[data-path="Remembrance"] {
+  --path-accent: #5b8def;
+}
+[data-path="Harmony"] {
+  --path-accent: #c565d6;
+}
+[data-path="Erudition"] {
+  --path-accent: #7c6fe0;
+}
+[data-path="Nihility"] {
+  --path-accent: #5b4f7a;
+}
+[data-path="Preservation"] {
+  --path-accent: #c9971f;
+}
+
+/* Excepción puntual, igual que en el proyecto principal: Phainon
+   pasa de rojo a morado. Va después de los Paths a propósito. */
+[data-nombre="Phainon"] {
+  --path-accent: #9b59d6;
+}
+
+/* ---------- Acentos por Elemento ---------- */
+[data-element="Physical"] {
+  --element-accent: #8a8594;
+}
+[data-element="Lightning"] {
+  --element-accent: #9b5de5;
+}
+[data-element="Quantum"] {
+  --element-accent: #5b4fd8;
+}
+[data-element="Imaginary"] {
+  --element-accent: #d4a537;
+}
+[data-element="Wind"] {
+  --element-accent: #35b38a;
+}
+[data-element="Ice"] {
+  --element-accent: #3ea8d8;
+}
+
+/* ---------- Reset básico ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color: var(--text-strong);
+  background: var(--bg);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Fondo: el arte de Amphoreus del proyecto principal, con un velo
+   oscuro para que el texto claro siempre contraste. Vertical por
+   defecto y horizontal en pantallas apaisadas. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(rgba(10, 6, 20, 0.55), rgba(10, 6, 20, 0.55)),
+    url("../media/chrysos_fondo_vertical.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+@media (orientation: landscape) {
+  body::before {
+    background-image: linear-gradient(rgba(10, 6, 20, 0.55), rgba(10, 6, 20, 0.55)),
+      url("../media/chrysos_fondo_horizontal.jpg");
+  }
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Botón de modo oscuro/claro ---------- */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 500;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(20, 14, 30, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(20, 14, 30, 0.85);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-toggle:active {
+    transform: scale(0.96);
+  }
+}
+
+@media (min-width: 600px) {
+  .theme-toggle {
+    top: 24px;
+    right: 24px;
+  }
+}
+
+/* ---------- Encabezado ---------- */
+.page-header {
+  padding: 2rem 1.25rem 1.5rem;
+  /* Franja propia arriba para que el título no se cruce con el botón
+     de tema (fijo, arriba a la derecha). */
+  margin-top: 4.5rem;
+  text-align: center;
+}
+
+.page-header h1 {
+  font-family: "Cinzel", serif;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fdf6e3;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55), 0 0 26px rgba(217, 165, 60, 0.55);
+}
+
+.page-subtitle {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(253, 246, 227, 0.75);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Navegación entre las dos páginas: vidrio esmerilado como el botón
+   de tema. */
+.page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.page-nav a {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(20, 14, 30, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.page-nav a[aria-current="page"] {
+  border-color: var(--gold);
+  color: #fdf6e3;
+}
+
+/* Botón que lleva al sitio principal de Chrysos Heirs: dorado para
+   que se distinga de los enlaces entre las páginas del CRUD. */
+.page-nav a.nav-main {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #23202b;
+}
+
+.page-nav a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- Paneles (tarjetas blancas) ---------- */
+.app,
+.admin {
+  display: grid;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+.app {
+  max-width: 900px;
+}
+
+.panel {
+  min-width: 0;
+  padding: 1.5rem;
+  border-radius: 28px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.panel h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.mode-hint {
+  margin: 4px 0 14px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Letra C / R / U / S dentro de un cuadrito de color. */
+.section-letter {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  margin-right: 6px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 800;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search {
+  flex: 1 1 220px;
+}
+
+.panel .search {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.status {
+  min-height: 1.4rem;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+/* Panel de filtros (index.html): oculto hasta que se abre con el
+   botón "Filters", que le saca el atributo "hidden". */
+.filters-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.filters-panel .field {
+  min-width: 160px;
+}
+
+.filters-panel .field-check {
+  align-items: center;
+}
+
+/* ---------- Controles ---------- */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--border-soft) 35%, var(--panel-bg));
+  color: var(--text-strong);
+  font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.btn:focus-visible,
+.btn-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn:hover {
+  background: var(--border-soft);
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #9186ea;
+}
+
+.btn-danger {
+  color: var(--danger);
+}
+
+/* Botón de borrar principal (panel D): relleno rojo. */
+.btn-danger-solid {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger-solid:hover {
+  background: var(--danger);
+  filter: brightness(1.1);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* <fieldset> sin borde ni margen: solo sirve para bloquear todos sus
+   campos a la vez con el atributo disabled (panel U). */
+.fieldset-reset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldset-reset:disabled {
+  opacity: 0.5;
+}
+
+/* Resumen del heredero elegido en el panel D. */
+.delete-preview {
+  padding: 12px 14px;
+  border: 1px dashed var(--border-soft);
+  border-radius: 14px;
+  color: var(--text-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Botón con aspecto de enlace (el "Undo" del estado). */
+.btn-link {
+  margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Píldoras de Path / Elemento / rasgos (las del principal) ---------- */
+.path-tag,
+.element-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Mezcladas contra --panel-bg (no un color fijo) para que se adapten
+   solas al modo oscuro. */
+.path-tag {
+  background: color-mix(in srgb, var(--path-accent) 20%, var(--panel-bg));
+  color: var(--path-accent);
+}
+
+.element-tag {
+  background: color-mix(in srgb, var(--element-accent) 20%, var(--panel-bg));
+  color: var(--element-accent);
+}
+
+.trait {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--border-soft);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* ---------- Lista de tarjetas (index.html) ---------- */
+.heir-list {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.heir {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px 16px;
+  padding: 16px;
+  border-radius: 28px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-card);
+}
+
+/* Contorno dorado del Deliverer, igual que en el principal. */
+.heir.is-deliverer {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.thumb {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 18px;
+  /* Mismo degradado de respaldo que la imagen de la tarjeta principal. */
+  background: linear-gradient(160deg, var(--path-accent), var(--element-accent));
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.thumb-initial {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.thumb.img-missing img {
+  display: none;
+}
+
+.thumb.img-missing .thumb-initial {
+  display: flex;
+}
+
+.heir-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.heir-meta {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.heir-actions {
+  display: flex;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.empty-state {
+  padding: 2rem 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.panel .empty-state {
+  color: var(--text-muted);
+}
+
+/* ---------- Formularios (Create y Update) ---------- */
+.admin-form,
+.dialog form {
+  display: grid;
+  gap: 12px;
+}
+
+/* Campos generados por gestion.js (buildFields): 2 columnas, y los
+   "wide" ocupan las dos. */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Etiqueta pequeña con el tipo de dato que espera cada campo. */
+.kind {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--border-soft);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.form-error {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Formulario de index.html (ventana emergente): campos escritos a mano. */
+.dialog label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+.dialog .field-check,
+.dialog .check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.dialog {
+  width: min(560px, calc(100% - 2rem));
+  max-height: 90vh;
+  padding: 1.5rem;
+  border: none;
+  border-radius: 28px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-card);
+  color: var(--text-strong);
+}
+
+.dialog::backdrop {
+  background: rgba(15, 10, 25, 0.6);
+}
+
+/* Mientras el login está abierto, todo lo que no sea el propio
+   diálogo (header, footer, etc.) se desenfoca y deja de responder al
+   mouse, para que quede claro que el panel está bloqueado. */
+body > :not(dialog) {
+  transition: filter 0.2s ease;
+}
+
+body.login-locked > :not(dialog) {
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* ---------- Sidebar con pestañas (gestion.html) ---------- */
+/* Mobile: las pestañas van en una fila arriba del contenido. Desde
+   900px (más abajo) pasan a una columna a la izquierda. */
+.admin-shell {
+  display: grid;
+  /* minmax(0, 1fr): sin esto la columna crece al ancho de la tabla de
+     usuarios y la página entera scrollea de costado en el celular. Así
+     la columna respeta el ancho de pantalla y la tabla scrollea
+     adentro de su .table-wrap. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+/* .admin (el CRUD) ya no necesita su propio ancho ni margen: ahora
+   vive dentro de .admin-shell. */
+.admin-shell .admin {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* display:grid le gana al atributo hidden; así se vuelve a esconder. */
+.admin-shell[hidden],
+.tab-panel[hidden] {
+  display: none;
+}
+
+.sidebar {
+  display: flex;
+  gap: 8px;
+  align-self: start;
+  padding: 8px;
+  border-radius: 999px;
+  background: rgba(20, 14, 30, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: rgba(255, 255, 255, 0.75);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-tab[aria-selected="true"] {
+  background: var(--gold);
+  color: #23202b;
+}
+
+.sidebar-tab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- Tabla de usuarios ---------- */
+.users-table code {
+  font-size: 0.8rem;
+}
+
+.hash summary {
+  cursor: pointer;
+  color: var(--text-body);
+}
+
+/* Lista de partidas de cada usuario (columna Games). */
+.games ol {
+  max-width: 360px;
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  white-space: normal;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.games li + li {
+  margin-top: 4px;
+}
+
+/* El hash completo mide 128 caracteres: se deja cortar en cualquier
+   punto para que no estire la tabla. */
+.hash p {
+  max-width: 320px;
+  margin: 6px 0 0;
+  white-space: normal;
+  word-break: break-all;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Tabla (gestion.html) ---------- */
+.table-wrap {
+  overflow-x: auto;
+  /* position:relative: el <span class="visually-hidden"> del encabezado
+     es position:absolute; sin un ancestro posicionado se ubica respecto
+     de la página y "se escapa" del overflow, ensanchando toda la página
+     en pantallas chicas. */
+  position: relative;
+}
+
+.heir-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.heir-table th,
+.heir-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.heir-table th {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cell-name {
+  font-weight: 800;
+}
+
+.cell-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.cell-actions .btn {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+}
+
+/* ---------- Panel de Storage ---------- */
+.storage-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 0 0 14px;
+}
+
+.storage-list dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.storage-list dd {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.storage-list code {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.storage-ok {
+  color: #1f9d70;
+}
+
+.storage-blocked {
+  color: var(--danger);
+}
+
+.storage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.storage-message {
+  min-height: 1.4rem;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+/* ---------- Pie de página ---------- */
+.site-footer {
+  padding: 1.5rem 1.25rem 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.site-footer p {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ---------- Tablet+ ---------- */
+@media (min-width: 600px) {
+  .heir {
+    grid-template-columns: 72px 1fr auto;
+    align-items: center;
+  }
+
+  .heir-actions {
+    grid-column: auto;
+    flex-direction: column;
+  }
+
+  .row {
+    grid-template-columns: 1fr 1fr 110px;
+  }
+}
+
+@media (min-width: 900px) {
+  /* Create a la izquierda, Read a la derecha; Storage ocupa todo el ancho. */
+  .admin {
+    grid-template-columns: minmax(320px, 400px) 1fr;
+    align-items: start;
+  }
+
+  .panel-wide {
+    grid-column: 1 / -1;
+  }
+
+  /* Sidebar a la izquierda (columna de 140px) y el contenido de la
+     pestaña a la derecha. */
+  .admin-shell {
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  /* Con el sidebar ocupando espacio, Create se achica un poco para que
+     la tabla de Read entre entera (con Edit y Delete) desde ~1280px.
+     minmax(0, 1fr) en Read: en pantallas más chicas la tabla scrollea
+     dentro de su caja en vez de ensanchar toda la página. */
+  .admin-shell .admin {
+    grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+  }
+
+  .sidebar {
+    flex-direction: column;
+    /* sticky: acompaña el scroll del CRUD, que es largo. */
+    position: sticky;
+    top: 1.5rem;
+    border-radius: 24px;
+  }
+
+  .sidebar-tab {
+    flex: none;
+    text-align: left;
+  }
+}
